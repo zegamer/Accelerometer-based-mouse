@@ -14,14 +14,21 @@ class Mouse:
     SM_CXSCREEN = 0
     SM_CYSCREEN = 1
 
+    def screen_size(self):
+        """Calculate screen size"""
+        x = ctypes.windll.user32.GetSystemMetrics(self.SM_CXSCREEN)
+        y = ctypes.windll.user32.GetSystemMetrics(self.SM_CYSCREEN)
+        return (x,y)
+    
     def _do_event(self, flags, x_pos, y_pos, data, extra_info):
-        """generate a mouse event"""
-        x_calc = 65536L * x_pos / ctypes.windll.user32.GetSystemMetrics(self.SM_CXSCREEN) + 1
-        y_calc = 65536L * y_pos / ctypes.windll.user32.GetSystemMetrics(self.SM_CYSCREEN) + 1
+        """Generate a mouse event"""
+        x,y = self.screen_size()
+        x_calc = 65536L * x_pos / x + 1
+        y_calc = 65536L * y_pos / y + 1
         return ctypes.windll.user32.mouse_event(flags, x_calc, y_calc, data, extra_info)
 
     def _get_button_value(self, button_name, button_up=False):
-        """convert the name of the button into the corresponding value"""
+        """Convert the name of the button into the corresponding value"""
         buttons = 0
         if button_name.find("right") >= 0:
             buttons = self.MOUSEEVENTF_RIGHTDOWN
@@ -34,15 +41,15 @@ class Mouse:
         return buttons
 
     def move_mouse(self, pos):
-        """move the mouse to the specified coordinates"""
+        """Move the mouse to the specified coordinates"""
         (x, y) = pos
         old_pos = self.get_position()
         x =  x if (x != -1) else old_pos[0]
         y =  y if (y != -1) else old_pos[1]    
-        self._do_event(self.MOUSEEVENTF_MOVE + self.MOUSEEVENTF_ABSOLUTE, x, y, 0, 0)
+        self._do_event(self.MOUSEEVENTF_MOVE + self.MOUSEEVENTF_ABSOLUTE, x, y, 2, 0)
 
     def press_button(self, pos=(-1, -1), button_name="left", button_up=False):
-        """push a button of the mouse"""
+        """Push a button of the mouse"""
         self.move_mouse(pos)
         self._do_event(self.get_button_value(button_name, button_up), 0, 0, 0, 0)
 
@@ -57,5 +64,5 @@ class Mouse:
             self.click(pos, button_name)
 
     def get_position(self):
-        """get mouse position"""
+        """Get mouse position"""
         return win32api.GetCursorPos()
