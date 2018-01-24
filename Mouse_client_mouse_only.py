@@ -1,3 +1,6 @@
+## Run on PC
+## This is not to be run on Pi
+
 from mouse_event import *
 from time import *
 from socket import *
